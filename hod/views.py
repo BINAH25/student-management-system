@@ -2,6 +2,7 @@ from django.shortcuts import render,redirect
 from django.contrib import messages
 from student.models import *
 from django.urls import reverse
+#from django.core.files.storage import FileSystemStorage
 
 # Create your views here.
 
@@ -77,3 +78,182 @@ def add_student(request):
             #return redirect(reverse("hod:add_student"))
     return render(request, 'hod/add_student.html',context)
 
+def add_subject(request):
+    courses = Courses.objects.all()
+    staffs = CustomUser.objects.filter(user_type=2)
+    context = {
+        'courses': courses,
+        'staffs':staffs
+    }
+    if request.method == "POST":
+        subject_name=request.POST.get("subject_name")
+        course_id=request.POST.get("course")
+        course=Courses.objects.get(id=course_id)
+        staff_id=request.POST.get("staff")
+        staff=CustomUser.objects.get(id=staff_id)
+
+        try:
+            subject=Subjects(subject_name=subject_name,course_id=course,staff_id=staff)
+            subject.save()
+            messages.success(request,"Successfully Added Subject")
+            return redirect(reverse("hod:add_subject"))
+        except:
+            messages.error(request,"Failed to Add Subject")
+            return redirect(reverse("hod:add_subject"))
+
+    return render(request, 'hod/add_subject.html',context)
+
+def manage_staff(request):
+    staffs=Staffs.objects.all()
+    context = {
+        'staffs':staffs
+    }
+
+    return render(request, 'hod/manage_staff.html', context)
+
+def manage_student(request):
+    students = CustomUser.objects.filter(user_type=3)
+    context = {
+        'students': students
+    }
+    return render(request, 'hod/manage_student.html',context)
+
+def manage_subject(request):
+    subjects = Subjects.objects.all()
+    context = {
+        'subjects': subjects
+    }
+    return render(request, 'hod/manage_subject.html',context)
+
+def manage_course(request):
+    courses = Courses.objects.all()
+    context = {
+        'courses': courses
+    }
+    return render(request, 'hod/manage_course.html', context)
+
+def edit_staff(request, pk):
+    staff=Staffs.objects.get(id=pk)
+    context = {
+        'staff': staff
+    }
+    if request.method =="POST":
+        admin_id=request.POST.get("admin_id")
+        first_name=request.POST.get("first_name")
+        last_name=request.POST.get("last_name")
+        email=request.POST.get("email")
+        username=request.POST.get("username")
+        address=request.POST.get("address")
+        try:
+            user=CustomUser.objects.get(id=admin_id)
+            user.first_name=first_name
+            user.last_name=last_name
+            user.email=email
+            user.username=username
+            user.save()
+
+            staff_model=Staffs.objects.get(id=pk)
+            staff_model.address=address
+            staff_model.save()
+            messages.success(request,"Successfully Edited Staff")
+            return redirect(request.META.get("HTTP_REFERER"))
+        except:
+            messages.error(request,"Failed to Edit Staff")
+            return redirect(request.META.get("HTTP_REFERER"))
+        
+    return render(request, 'hod/edit_staff.html', context)
+
+
+def edit_student(request,pk):
+    student = Students.objects.get(id=pk)
+    courses = Courses.objects.all()
+
+    context = {
+        'student': student,
+        'courses':courses
+    }
+
+    if request.method == "POST":
+        first_name=request.POST["first_name"]
+        last_name=request.POST["last_name"]
+        username=request.POST["username"]
+        email=request.POST["email"]
+        address=request.POST["address"]
+        session_start=request.POST["session_start"]
+        session_end=request.POST["session_end"]
+        course_id=request.POST["course"]
+        sex=request.POST["sex"]
+        admin_id = request.POST["admin_id"]
+        profile_pic = request.FILES["profile"]
+        try:
+            user = CustomUser.objects.get(id=admin_id)
+            user.first_name=first_name
+            user.last_name=last_name
+            user.email=email
+            user.username=username
+            user.save()
+
+            student.address=address
+            student.session_start_year=session_start
+            student.session_end_year=session_end
+            student.gender=sex
+            course=Courses.objects.get(id=course_id)
+            student.course_id=course
+            student.profile_pic=profile_pic        
+            student.save()
+            messages.success(request,"Successfully Edited Student")
+            return redirect(request.META.get("HTTP_REFERER"))
+        except:
+            messages.error(request,"Failed Edited Student")
+            return redirect(request.META.get("HTTP_REFERER"))
+       
+      
+    return render(request, 'hod/edit_student.html', context)
+
+
+def edit_course(request,pk):
+    course = Courses.objects.get(id=pk)
+    context = {
+        'course': course
+    }
+    if request.method == "POST":
+        course_name = request.POST["course"]
+        try:
+            course.course_name=course_name
+            course.save()
+            messages.success(request,"Successfully Edited Course")
+            return redirect(request.META.get("HTTP_REFERER"))
+        except:
+            messages.error(request,"Failed to Edit Course")
+            return redirect(request.META.get("HTTP_REFERER"))
+
+    return render(request, 'hod/edit_course.html',context)
+
+
+def edit_subject(request,pk):
+    subject = Subjects.objects.get(id=pk)
+    courses = Courses.objects.all()
+    staffs = CustomUser.objects.filter(user_type=2)
+    context = {
+        'subject': subject,
+        'courses' : courses,
+        'staffs': staffs
+    }
+    if request.method == "POST":
+        subject_name = request.POST["subject_name"]
+        course_id = request.POST["course"]
+        staff_id = request.POST["staff"]
+        staff = CustomUser.objects.get(id=staff_id)
+        course = Courses.objects.get(id=course_id)
+        try:
+            subject.subject_name = subject_name
+            subject.staff_id=staff
+            subject.course_id=course
+            subject.save()
+            messages.success(request,"Successfully Edited Subject")
+            return redirect(request.META.get("HTTP_REFERER"))
+        except:
+            messages.error(request,"Failed to Edit Subject")
+            return redirect(request.META.get("HTTP_REFERER"))
+
+    return render(request, 'hod/edit_subject.html',context)
