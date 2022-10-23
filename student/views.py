@@ -5,8 +5,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
 
 # Create your views here.
-def dashboard(request):
-    return render(request, 'demo.html')
+def student_home(request):
+    return render(request, 'student/home.html')
 
 def home(request):
     if request.method == 'POST':
@@ -19,9 +19,11 @@ def home(request):
             if user.user_type=="1":
                 return redirect('hod:hod_home')
             elif user.user_type=="2":
-                return redirect('student:dashboard')
+                return redirect('staff:staff_home')
+            elif user.user_type=="3":
+                return redirect('student:student_home')
             else:
-                return HttpResponseRedirect(reverse('student:dashboard'))   
+                messages.error(request,"Invalid Login Details")
         else:
             messages.error(request,"Invalid Login Details")
             return redirect("student:home")

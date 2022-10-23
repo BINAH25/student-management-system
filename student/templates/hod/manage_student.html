@@ -57,8 +57,8 @@ Manage Student
                                     <td>{{ student.students.address }}</td>
                                     <td>{{ student.students.gender }}</td>
                                     <td><img src="{{ student.students.profile_pic.url }}" style="width:50px" /></td>
-                                    <td>{{ student.students.session_start_year }}</td>
-                                    <td>{{ student.students.session_end_year }}</td>
+                                    <td>{{ student.students.session_year.session_start_year }}</td>
+                                    <td>{{ student.students.session_year.session_end_year }}</td>
                                     <td>{{ student.students.course_id.course_name }}</td>
                                     <td>{{ student.last_login }}</td>
                                     <td>{{ student.date_joined }}</td>

@@ -64,14 +64,12 @@ Edit Student| Username : {{ student.admin.username }} | #ID : {{ student.admin.i
                                 <input type="file" class="form-control" placeholder="Address" name="profile" value="{{student.profile_pic.url}}">
                             </div>
                             <div class="form-group">
-                                <label>session_start</label>
-                                <input type="date" class="form-control" placeholder="session_start" name="session_start"
-                                    value="{{ student.session_start_year|date:"Y-m-d"}}">
-                            </div>
-                            <div class="form-group">
-                                <label>session_end</label>
-                                <input type="date" class="form-control" placeholder="session_end" name="session_end"
-                                    value="{{ student.session_end_year|date:"Y-m-d"}}">
+                                <label>Session Year </label>
+                                <select class="form-control" name="session_year" id="">
+                                    {% for session_year in session_years %}
+                                        <option value="{{ session_year.id }}"{% if session_year.id == student.session_year.id %} selected {% endif %}>{{ session_year.session_start_year }} to {{ session_year.session_end_year }}</option>
+                                    {% endfor %}
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>Courses</label>

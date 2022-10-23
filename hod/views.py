@@ -20,6 +20,7 @@ def add_staff(request):
 
         try:
             user=CustomUser.objects.create_user(username=username,password=password,email=email,last_name=last_name,first_name=first_name,user_type=2)
+            user.staffs.address=address
             user.save()
             messages.success(request,"Successfully Added Staff")
             return redirect(reverse('hod:add_staff'))
@@ -46,8 +47,10 @@ def add_course(request):
 
 def add_student(request):
     courses = Courses.objects.all()
+    session_years = SessionYear.objects.all()
     context = {
-        'courses': courses
+        'courses': courses,
+        'session_years':session_years
     }
     if request.method == "POST":
         first_name=request.POST["first_name"]
@@ -56,26 +59,25 @@ def add_student(request):
         email=request.POST["email"]
         password=request.POST["password"]
         address=request.POST["address"]
-        session_start=request.POST["session_start"]
-        session_end=request.POST["session_end"]
         course_id=request.POST["course"]
         sex=request.POST["sex"]
-
-        #try:
-        user=CustomUser.objects.create_user(username=username,password=password,email=email,last_name=last_name,first_name=first_name,user_type=3)
-        #user.students.address=address
-        #course_obj=Courses.objects.get(id=course_id)
-        #user.students.course_id=course_obj
-        #user.students.session_start_year=session_start
-        #user.students.session_end_year=session_end
-        #user.students.gender=sex
-        #user.students.profile_pic=""
-        user.save()
-        messages.success(request,"Successfully Added Student")
-        return redirect(reverse("hod:add_student"))
-        #except:
-            #messages.error(request,"Failed to Add Student")
-            #return redirect(reverse("hod:add_student"))
+        session_year = request.POST["session_year"]
+        profile_pic = request.FILES["profile",False]
+        try:
+            user=CustomUser.objects.create_user(username=username,password=password,email=email,last_name=last_name,first_name=first_name,user_type=3)
+            user.students.address=address
+            course_obj=Courses.objects.get(id=course_id)
+            user.students.course_id=course_obj
+            session_obj = SessionYear.objects.get(id=session_year)
+            user.students.session_year=session_obj
+            user.students.gender=sex
+            user.students.profile_pic=profile_pic
+            user.save()
+            messages.success(request,"Successfully Added Student")
+            return redirect(reverse("hod:add_student"))
+        except:
+            messages.error(request,"Failed to Add Student")
+            return redirect(reverse("hod:add_student"))
     return render(request, 'hod/add_student.html',context)
 
 def add_subject(request):
@@ -102,6 +104,22 @@ def add_subject(request):
             return redirect(reverse("hod:add_subject"))
 
     return render(request, 'hod/add_subject.html',context)
+
+def add_session(request):
+    if request.method == "POST":
+        session_start_year = request.POST["session_start_year"]
+        session_end_year = request.POST["session_end_year"]
+        try:
+            session_year = SessionYear(session_start_year=session_start_year,session_end_year=session_end_year)
+            session_year.save()
+            messages.success(request,"Successfully Added add_session")
+            return redirect(reverse("hod:add_session"))
+        except:
+            messages.error(request,"Failed to Add Session")
+            return redirect(reverse("hod:add_session"))
+
+       
+    return render(request, 'hod/add_session.html')
 
 def manage_staff(request):
     staffs=Staffs.objects.all()
@@ -131,6 +149,13 @@ def manage_course(request):
         'courses': courses
     }
     return render(request, 'hod/manage_course.html', context)
+
+def manage_session(request):
+    session_years = SessionYear.objects.all()
+    context = {
+        'session_years': session_years
+    }
+    return render(request, 'hod/manage_session.html', context)
 
 def edit_staff(request, pk):
     staff=Staffs.objects.get(id=pk)
@@ -167,10 +192,11 @@ def edit_staff(request, pk):
 def edit_student(request,pk):
     student = Students.objects.get(id=pk)
     courses = Courses.objects.all()
-
+    session_years = SessionYear.objects.all()
     context = {
         'student': student,
-        'courses':courses
+        'courses':courses,
+        'session_years':session_years
     }
 
     if request.method == "POST":
@@ -179,10 +205,9 @@ def edit_student(request,pk):
         username=request.POST["username"]
         email=request.POST["email"]
         address=request.POST["address"]
-        session_start=request.POST["session_start"]
-        session_end=request.POST["session_end"]
         course_id=request.POST["course"]
         sex=request.POST["sex"]
+        session_year = request.POST["session_year"]
         admin_id = request.POST["admin_id"]
         profile_pic = request.FILES["profile"]
         try:
@@ -193,9 +218,9 @@ def edit_student(request,pk):
             user.username=username
             user.save()
 
+            session_obj = SessionYear.objects.get(id=session_year)
+            student.session_year=session_obj
             student.address=address
-            student.session_start_year=session_start
-            student.session_end_year=session_end
             student.gender=sex
             course=Courses.objects.get(id=course_id)
             student.course_id=course
@@ -257,3 +282,23 @@ def edit_subject(request,pk):
             return redirect(request.META.get("HTTP_REFERER"))
 
     return render(request, 'hod/edit_subject.html',context)
+
+def edit_session(request,pk):
+    session_year = SessionYear.objects.get(id=pk)
+    context = {
+        'session_year':session_year
+    }
+    if request.method == "POST":
+        session_start_year = request.POST["session_start_year"]
+        session_end_year = request.POST["session_end_year"]
+        try:
+            session_year.session_start_year = session_start_year
+            session_year.session_end_year = session_end_year
+            session_year.save()
+            messages.success(request,"Successfully Edited SessionYear")
+            return redirect(request.META.get("HTTP_REFERER"))
+        except:
+            messages.error(request,"Failed to Edit SessionYear")
+            return redirect(request.META.get("HTTP_REFERER"))
+
+    return render(request, 'hod/edit_session.html',context)
