@@ -62,7 +62,7 @@ def add_student(request):
         course_id=request.POST["course"]
         sex=request.POST["sex"]
         session_year = request.POST["session_year"]
-        profile_pic = request.FILES["profile",False]
+        profile_pic = request.FILES["profile"]
         try:
             user=CustomUser.objects.create_user(username=username,password=password,email=email,last_name=last_name,first_name=first_name,user_type=3)
             user.students.address=address

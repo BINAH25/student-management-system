@@ -27,7 +27,7 @@ def get_students(request):
     session_year=request.POST.get("session_year")
 
     subject=Subjects.objects.get(id=subject_id)
-    session_model=SessionYear.object.get(id=session_year)
+    session_model=SessionYear.objects.get(id=session_year)
     students=Students.objects.filter(course_id=subject.course_id,session_year_id=session_model)
     list_data=[]
 
@@ -44,18 +44,18 @@ def save_attendance_data(request):
     session_year_id=request.POST.get("session_year_id")
 
     subject_model=Subjects.objects.get(id=subject_id)
-    session_model=SessionYear.object.get(id=session_year_id)
+    session_model=SessionYear.objects.get(id=session_year_id)
     json_sstudent=json.loads(student_ids)
     #print(data[0]['id'])
 
     try:
-        attendance=Attendance(subject_id=subject_model,attendance_date=attendance_date,session_year_id=session_model)
+        attendance=Attendance(subject_id=subject_model,attendance_date=attendance_date,session_year=session_model)
         attendance.save()
 
         for stud in json_sstudent:
-             student=Students.objects.get(admin=stud['id'])
-             attendance_report=AttendanceReport(student_id=student,attendance_id=attendance,status=stud['status'])
-             attendance_report.save()
+                student=Students.objects.get(admin=stud['id'])
+                attendance_report=AttendanceReport(student_id=student,attendance_id=attendance,status=stud['status'])
+                attendance_report.save()
         return HttpResponse("OK")
     except:
         return HttpResponse("ERR")
@@ -124,10 +124,15 @@ def apply_for_leave(request):
     if request.method == "POST":
         leave_date = request.POST['leave_date']
         leave_msg = request.POST['leave_msg']
-        report = LeaveReportStaff(staff_id=staff,leave_date=leave_date,leave_message=leave_msg,leave_status=0)
-        report.save()
-        messages.success(request,"Successfully Requested for Leave ")
-        return redirect("staff:apply_for_leave")
+        try:
+            report = LeaveReportStaff(staff_id=staff,leave_date=leave_date,leave_message=leave_msg,leave_status=0)
+            report.save()
+            messages.success(request,"Successfully Requested for Leave ")
+            return redirect("staff:apply_for_leave")
+        except:
+            messages.error(request,"Failed to Request for leave ")
+            return redirect("staff:apply_for_leave")
+        
     return render(request, 'staff/apply_for_leave.html', context)
 
 def staff_feedback(request):
@@ -138,9 +143,13 @@ def staff_feedback(request):
     }
     if request.method == "POST":
         feedback_msg = request.POST['feedback_msg']
-        feedback = FeedBackStaffs(staff_id=staff,feedback=feedback_msg,feedback_reply="")
-        feedback.save()
-        messages.success(request,"Successfully ask for feedback ")
-        return redirect("staff:staff_feedback")
-    
+        try:
+            feedback = FeedBackStaffs(staff_id=staff,feedback=feedback_msg,feedback_reply="")
+            feedback.save()
+            messages.success(request,"Successfully ask for feedback ")
+            return redirect("staff:staff_feedback")
+        except:
+            messages.error(request,"Failed to add feedback ")
+            return redirect("staff:staff_feedback")
+        
     return render(request,'staff/feedback.html', context)
