@@ -2,6 +2,9 @@ from django.shortcuts import render,redirect
 from django.contrib import messages
 from student.models import *
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+
 #from django.core.files.storage import FileSystemStorage
 
 # Create your views here.
@@ -17,6 +20,15 @@ def add_staff(request):
         email=request.POST.get("email")
         password=request.POST.get("password")
         address=request.POST.get("address")
+        #CHECK IF USERNAME ALREADY EXIST
+        if CustomUser.objects.filter(username=username):
+            messages.error(request, "Username Already Exist")
+            return redirect(request.META.get("HTTP_REFERER"))
+        
+        #CHECK IF EMAIL ALREADY EXIST
+        if CustomUser.objects.filter(email=email):
+            messages.error(request, "Email Already Exist")
+            return redirect(request.META.get("HTTP_REFERER"))
 
         try:
             user=CustomUser.objects.create_user(username=username,password=password,email=email,last_name=last_name,first_name=first_name,user_type=2)
@@ -63,6 +75,16 @@ def add_student(request):
         sex=request.POST["sex"]
         session_year = request.POST["session_year"]
         profile_pic = request.FILES["profile"]
+        #CHECK IF USERNAME ALREADY EXIST
+        if CustomUser.objects.filter(username=username):
+            messages.error(request, "Username Already Exist")
+            return redirect(request.META.get("HTTP_REFERER"))
+        
+        #CHECK IF EMAIL ALREADY EXIST
+        if CustomUser.objects.filter(email=email):
+            messages.error(request, "Email Already Exist")
+            return redirect(request.META.get("HTTP_REFERER"))
+
         try:
             user=CustomUser.objects.create_user(username=username,password=password,email=email,last_name=last_name,first_name=first_name,user_type=3)
             user.students.address=address
@@ -302,3 +324,44 @@ def edit_session(request,pk):
             return redirect(request.META.get("HTTP_REFERER"))
 
     return render(request, 'hod/edit_session.html',context)
+
+def student_feedback_message(request):
+    feedbacks=FeedBackStudent.objects.all()
+    context = {
+        'feedbacks':feedbacks
+    }
+    return render(request,'hod/student_feedback_message.html',context)
+
+@csrf_exempt
+def student_feedback_message_replied(request):
+    feedback_id=request.POST.get("id")
+    feedback_message=request.POST.get("message")
+
+    try:
+        feedback=FeedBackStudent.objects.get(id=feedback_id)
+        feedback.feedback_reply=feedback_message
+        feedback.save()
+        return HttpResponse("True")
+    except:
+        return HttpResponse("False")
+
+def staff_feedback_message(request):
+    feedbacks=FeedBackStaffs.objects.all()
+    context = {
+        'feedbacks':feedbacks
+    }
+    return render(request,'hod/staff_feedback_message.html',context)
+
+@csrf_exempt
+def staff_feedback_message_replied(request):
+    feedback_id=request.POST.get("id")
+    feedback_message=request.POST.get("message")
+
+    try:
+        feedback=FeedBackStaffs.objects.get(id=feedback_id)
+        feedback.feedback_reply=feedback_message
+        feedback.save()
+        return HttpResponse("True")
+    except:
+        return HttpResponse("False")
+    

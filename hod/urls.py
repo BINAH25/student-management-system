@@ -20,6 +20,8 @@ urlpatterns = [
     path("edit_course/<int:pk>", views.edit_course, name="edit_course"),
     path("edit_subject/<int:pk>", views.edit_subject, name="edit_subject"),
     path("edit_session/<int:pk>", views.edit_session, name="edit_session"),
-
-    
+    path("student_feedback_message", views.student_feedback_message, name="student_feedback_message"),
+    path("staff_feedback_message", views.staff_feedback_message, name="staff_feedback_message"),
+    path("student_feedback_message_replied", views.student_feedback_message_replied, name="student_feedback_message_replied"),
+    path("staff_feedback_message_replied", views.staff_feedback_message_replied, name="staff_feedback_message_replied"), 
 ]
