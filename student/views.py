@@ -62,3 +62,43 @@ def student_view_attendance_post(request):
         'attendance_reports':attendance_reports
     }
     return render(request,"student/attendance_data.html",context)
+
+
+def student_apply_for_leave(request):
+    student = Students.objects.get(admin=request.user.id)
+    leave_data = LeaveReportStudent.objects.filter(student_id=student)
+    context = {
+        'leave_data': leave_data
+    }
+    if request.method == "POST":
+        leave_date = request.POST['leave_date']
+        leave_msg = request.POST['leave_msg']
+        try:
+            report = LeaveReportStudent(student_id=student,leave_date=leave_date,leave_message=leave_msg,leave_status=0)
+            report.save()
+            messages.success(request,"Successfully Requested for Leave ")
+            return redirect("student:student_apply_for_leave")
+        except:
+            messages.error(request,"Failed to Request for leave ")
+            return redirect("student:student_apply_for_leave")
+        
+    return render(request, 'student/apply_for_leave.html', context)
+
+def student_feedback(request):
+    student = Students.objects.get(admin=request.user.id)
+    feedback_data = FeedBackStudent.objects.filter(student_id=student)
+    context = {
+        'feedback_data':feedback_data
+    }
+    if request.method == "POST":
+        feedback_msg = request.POST['feedback_msg']
+        try:
+            feedback = FeedBackStudent(student_id=student,feedback=feedback_msg,feedback_reply="")
+            feedback.save()
+            messages.success(request,"Successfully ask for feedback ")
+            return redirect("student:student_feedback")
+        except:
+            messages.error(request,"Failed to add feedback ")
+            return redirect("student:student_feedback")
+        
+    return render(request,'student/feedback.html', context)
