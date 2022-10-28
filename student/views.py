@@ -8,7 +8,19 @@ import datetime
 
 # Create your views here.
 def student_home(request):
-    return render(request, 'student/home.html')
+    student = Students.objects.get(admin=request.user.id)
+    attendance_count = AttendanceReport.objects.filter(student_id=student).count()
+    attendance_present = AttendanceReport.objects.filter(student_id=student,status=True).count()
+    attendance_absent = AttendanceReport.objects.filter(student_id=student,status=False).count()
+    course_id = Courses.objects.get(id=student.course_id.id)
+    subject_count = Subjects.objects.filter(course_id=course_id).count()
+    context = {
+        'attendance_count': attendance_count,
+        'attendance_present':attendance_present,
+        'attendance_absent':attendance_absent,
+        'subject_count':subject_count
+    }
+    return render(request, 'student/home.html',context)
 
 def home(request):
     if request.method == 'POST':
