@@ -4,6 +4,8 @@ from student.models import *
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.core import serializers
+import json
 
 #from django.core.files.storage import FileSystemStorage
 
@@ -364,4 +366,103 @@ def staff_feedback_message_replied(request):
         return HttpResponse("True")
     except:
         return HttpResponse("False")
-    
+
+def student_leave_view(request):
+    leaves = LeaveReportStudent.objects.all()
+    context = {
+        'leaves': leaves
+    }
+    return render(request,'hod/student_leave_view.html',context)
+
+def student_approve_leave(request,pk):
+    leave = LeaveReportStudent.objects.get(id=pk)
+    leave.leave_status = 1
+    leave.save()
+    return redirect("hod:student_leave_view")
+
+def student_disapprove_leave(request,pk):
+    leave = LeaveReportStudent.objects.get(id=pk)
+    leave.leave_status = 2
+    leave.save()
+    return redirect("hod:student_leave_view")
+
+def staff_leave_view(request):
+    leaves = LeaveReportStaff.objects.all()
+    context = {
+        'leaves': leaves
+    }
+    return render(request,'hod/staff_leave_view.html',context)
+
+def staff_approve_leave(request,pk):
+    leave = LeaveReportStaff.objects.get(id=pk)
+    leave.leave_status = 1
+    leave.save()
+    return redirect("hod:student_leave_view")
+
+def staff_disapprove_leave(request,pk):
+    leave = LeaveReportStaff.objects.get(id=pk)
+    leave.leave_status = 2
+    leave.save()
+    return redirect("hod:student_leave_view")
+
+def admin_view_attendance(request):
+    subjects=Subjects.objects.all()
+    session_year_id=SessionYear.objects.all()
+    context = {
+        'subjects': subjects,
+        'session_year_id':session_year_id
+    }
+    return render(request,"hod/admin_view_attendance.html",context)
+
+@csrf_exempt
+def admin_get_attendance_dates(request):
+    subject=request.POST.get("subject")
+    session_year_id=request.POST.get("session_year_id")
+    subject_obj=Subjects.objects.get(id=subject)
+    session_year_obj=SessionYear.objects.get(id=session_year_id)
+    attendance=Attendance.objects.filter(subject_id=subject_obj,session_year=session_year_obj)
+    attendance_obj=[]
+    for attendance_single in attendance:
+        data={"id":attendance_single.id,"attendance_date":str(attendance_single.attendance_date),"session_year_id":attendance_single.session_year.id}
+        attendance_obj.append(data)
+
+    return JsonResponse(json.dumps(attendance_obj),safe=False)
+
+
+@csrf_exempt
+def admin_get_attendance_student(request):
+    attendance_date=request.POST.get("attendance_date")
+    attendance=Attendance.objects.get(id=attendance_date)
+
+    attendance_data=AttendanceReport.objects.filter(attendance_id=attendance)
+    list_data=[]
+
+    for student in attendance_data:
+        data_small={"id":student.student_id.admin.id,"name":student.student_id.admin.first_name+" "+student.student_id.admin.last_name,"status":student.status}
+        list_data.append(data_small)
+    return JsonResponse(json.dumps(list_data),content_type="application/json",safe=False)
+
+def admin_profile(request):
+    user=CustomUser.objects.get(id=request.user.id)
+    context ={
+        'user': user
+    }
+    if request.method =="POST":
+        first_name=request.POST.get("first_name")
+        last_name=request.POST.get("last_name")
+        username=request.POST.get("username")
+        email=request.POST.get("email")
+        password=request.POST.get("password")
+        #try:
+        user.first_name=first_name
+        user.last_name=last_name
+        user.username=username
+        user.email=email
+        # if password!=None and password!="":
+        #     customuser.set_password(password)
+        user.save()
+        messages.success(request, "Successfully Updated Profile")
+        return redirect("hod:admin_profile")
+        
+    return render(request,"hod/admin_profile.html",context)
+

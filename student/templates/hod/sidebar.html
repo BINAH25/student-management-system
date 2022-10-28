@@ -25,6 +25,14 @@
                 <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
                 <li class="nav-item">
+                    <a href="{% url 'hod:admin_profile'%}" class="nav-link ">
+                        <i class="nav-icon fas fa-th"></i>
+                        <p>
+                            Edit Profile
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="{% url 'hod:add_staff'%}" class="nav-link ">
                         <i class="nav-icon fas fa-th"></i>
                         <p>
@@ -109,11 +117,10 @@
                 </li>
 
                 <li class="nav-item">
-                    <a href="" class="nav-link">
+                    <a href="{% url 'hod:admin_view_attendance'%}" class="nav-link">
                         <i class="nav-icon fas fa-th"></i>
                         <p>
                             View Attendance
-                            <span class="right badge badge-danger">New</span>
                         </p>
                     </a>
                 </li>
@@ -134,20 +141,18 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="" class="nav-link">
+                    <a href="{% url 'hod:student_leave_view'%}" class="nav-link">
                         <i class="nav-icon fas fa-th"></i>
                         <p>
                             Student Leave
-                            <span class="right badge badge-danger">New</span>
                         </p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="" class="nav-link">
+                    <a href="{% url 'hod:staff_leave_view'%}" class="nav-link">
                         <i class="nav-icon fas fa-th"></i>
                         <p>
                             Staff Leave
-                            <span class="right badge badge-danger">New</span>
                         </p>
                     </a>
                 </li>
