@@ -38,10 +38,19 @@
         <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
         <li class="nav-item">
+          <a href="{% url 'staff:staff_home'%}" class="nav-link">
+            <i class="nav-icon fas fa-th"></i>
+            <p>
+              Home
+            </p>
+          </a>
+        </li>
+        
+        <li class="nav-item">
           <a href="{% url 'staff:attendance'%}" class="nav-link">
             <i class="nav-icon fas fa-th"></i>
             <p>
-              Attendance
+              Take Attendance
             </p>
           </a>
         </li>
@@ -70,24 +79,7 @@
             </p>
           </a>
         </li>
-        <li class="nav-item">
-          <a href="" class="nav-link">
-            <i class="nav-icon fas fa-th"></i>
-            <p>
-              Student Leave
-              <span class="right badge badge-danger">New</span>
-            </p>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="" class="nav-link">
-            <i class="nav-icon fas fa-th"></i>
-            <p>
-              Staff Leave
-              <span class="right badge badge-danger">New</span>
-            </p>
-          </a>
-        </li>
+        
       </ul>
     </nav>
     <!-- /.sidebar-menu -->

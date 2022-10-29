@@ -8,7 +8,59 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 
 # Create your views here.
 def staff_home(request):
-    return render(request,'staff/home.html')
+    subjects=Subjects.objects.filter(staff_id=request.user.id)
+    course_id_list=[]
+    for subject in subjects:
+        course=Courses.objects.get(id=subject.course_id.id)
+        course_id_list.append(course.id)
+
+    final_course=[]
+    #removing Duplicate Course ID
+    for course_id in course_id_list:
+        if course_id not in final_course:
+            final_course.append(course_id)
+
+    students_count=Students.objects.filter(course_id__in=final_course).count()
+
+    #Fetch All Attendance Count
+    attendance_count=Attendance.objects.filter(subject_id__in=subjects).count()
+
+    #Fetch All Approve Leave
+    staff=Staffs.objects.get(admin=request.user.id)
+    leave_count=LeaveReportStaff.objects.filter(staff_id=staff.id,leave_status=1).count()
+    subject_count=subjects.count()
+
+    #Fetch Attendance Data by Subject
+    subject_list=[]
+    attendance_list=[]
+    for subject in subjects:
+        attendance_count1=Attendance.objects.filter(subject_id=subject.id).count()
+        subject_list.append(subject.subject_name)
+        attendance_list.append(attendance_count1)
+
+    students_attendance=Students.objects.filter(course_id__in=final_course)
+    student_list=[]
+    student_list_attendance_present=[]
+    student_list_attendance_absent=[]
+    for student in students_attendance:
+        attendance_present_count=AttendanceReport.objects.filter(status=True,student_id=student.id).count()
+        attendance_absent_count=AttendanceReport.objects.filter(status=False,student_id=student.id).count()
+        student_list.append(student.admin.username)
+        student_list_attendance_present.append(attendance_present_count)
+        student_list_attendance_absent.append(attendance_absent_count)
+
+    context = {
+        "students_count":students_count,
+        "attendance_count":attendance_count,
+        "leave_count":leave_count,
+        "subject_count":subject_count,
+        "subject_list":subject_list,
+        "attendance_list":attendance_list,
+        "student_list":student_list,
+        "present_list":student_list_attendance_present,
+        "absent_list":student_list_attendance_absent
+    }
+    return render(request,'staff/home.html', context)
 
 
 
@@ -74,11 +126,11 @@ def get_attendance_dates(request):
     subject=request.POST.get("subject")
     session_year_id=request.POST.get("session_year_id")
     subject_obj=Subjects.objects.get(id=subject)
-    session_year_obj=SessionYear.object.get(id=session_year_id)
-    attendance=Attendance.objects.filter(subject_id=subject_obj,session_year_id=session_year_obj)
+    session_year_obj=SessionYear.objects.get(id=session_year_id)
+    attendance=Attendance.objects.filter(subject_id=subject_obj,session_year=session_year_obj)
     attendance_obj=[]
     for attendance_single in attendance:
-        data={"id":attendance_single.id,"attendance_date":str(attendance_single.attendance_date),"session_year_id":attendance_single.session_year_id.id}
+        data={"id":attendance_single.id,"attendance_date":str(attendance_single.attendance_date),"session_year_id":attendance_single.session_year.id}
         attendance_obj.append(data)
 
     return JsonResponse(json.dumps(attendance_obj),safe=False)
